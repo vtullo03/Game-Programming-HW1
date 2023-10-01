@@ -1,4 +1,2 @@
 ﻿  main.cpp
-E:\School Programming\Game Programming Intro\Game-Programming-HW1\HW1\HW1\main.cpp(49,32): warning C4305: 'initializing': truncation from 'double' to 'float'
-E:\School Programming\Game Programming Intro\Game-Programming-HW1\HW1\HW1\main.cpp(50,33): warning C4305: 'initializing': truncation from 'double' to 'float'
   HW1.vcxproj -> E:\School Programming\Game Programming Intro\Game-Programming-HW1\HW1\Debug\HW1.exe
