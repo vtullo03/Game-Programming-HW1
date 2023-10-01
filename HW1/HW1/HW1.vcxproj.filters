@@ -28,13 +28,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="GabrielBase.png">
+    <Image Include="GabrielBaseBIG.png">
       <Filter>Source Files</Filter>
     </Image>
-    <Image Include="GabrielWingLeft.png">
+    <Image Include="GabrielWingLeftBIG.png">
       <Filter>Source Files</Filter>
     </Image>
-    <Image Include="GabrielWingRight.png">
+    <Image Include="GabrielWingRightBIG.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="GabrielWingLeftGLOW.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="GabrielWingRightGLOW.png">
       <Filter>Source Files</Filter>
     </Image>
   </ItemGroup>

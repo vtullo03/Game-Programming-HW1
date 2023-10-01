@@ -140,9 +140,11 @@
     <ClInclude Include="ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="GabrielBase.png" />
-    <Image Include="GabrielWingLeft.png" />
-    <Image Include="GabrielWingRight.png" />
+    <Image Include="GabrielBaseBIG.png" />
+    <Image Include="GabrielWingLeftGLOW.png" />
+    <Image Include="GabrielWingLeftBIG.png" />
+    <Image Include="GabrielWingRightBIG.png" />
+    <Image Include="GabrielWingRightGLOW.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
