@@ -62,8 +62,8 @@ g_projection_matrix;  // characteristic of the camera
 float g_frame_counter = 0.0f; // keeps track of the frames
 // change speed constants
 const float MAX_FRAME = 4;
-const float MOVEMENT_SPEED = 1.0f;
-const float GROWTH_FACTOR = .3f;
+const float MOVEMENT_SPEED = 3.0f;
+const float GROWTH_FACTOR = .5f;
 
 // for time.deltaTime
 float g_previous_ticks = 0.0f;
@@ -169,14 +169,6 @@ void initialise()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // since initalize gets calls once
-    // shifts the objects over BEFORE any movement is done - starting point
-    g_model_matrix = glm::translate(g_model_matrix, glm::vec3(-2.5f, -2.0f, 0.0f));
-    g_model_matrix_leftwing = glm::translate(g_model_matrix, glm::vec3(-0.1f, -0.3f, 0.0f));
-    g_model_matrix_rightwing = glm::translate(g_model_matrix, glm::vec3(0.1f, -0.3f, 0.0f));
-    g_model_matrix_leftglow = glm::translate(g_model_matrix, glm::vec3(-0.1f, -0.3f, 0.0f));
-    g_model_matrix_rightglow = glm::translate(g_model_matrix, glm::vec3(0.1f, -0.3f, 0.0f));
 }
 
 void process_input()
@@ -196,31 +188,29 @@ void move_in_v(glm::mat4& object_model_matrix, float delta_time)
 {
     // reset matrix
     object_model_matrix = glm::mat4(1.0f);
-
-    // account for delta time
     float speed = delta_time * MOVEMENT_SPEED;
 
     // moves object in a upside down V motion
     // breaks the movements into 4 segments
     if (g_frame_counter < (MAX_FRAME / 4))
     {
-        x_movement += delta_time * MOVEMENT_SPEED;
-        y_movement += delta_time * MOVEMENT_SPEED;
+        x_movement += speed;
+        y_movement += speed;
     }
-    else if (g_frame_counter < (MAX_FRAME / 2) && g_frame_counter > (MAX_FRAME / 4))
+    else if (g_frame_counter < (MAX_FRAME / 2) && g_frame_counter >(MAX_FRAME / 4))
     {
-        x_movement += delta_time * MOVEMENT_SPEED;
-        y_movement -= delta_time * MOVEMENT_SPEED;
+        x_movement += speed;
+        y_movement -= speed;
     }
     else if (g_frame_counter < ((MAX_FRAME / 4) * 3) && g_frame_counter > (MAX_FRAME / 2))
     {
-        x_movement -= delta_time * MOVEMENT_SPEED;
-        y_movement += delta_time * MOVEMENT_SPEED;
+        x_movement -= speed;
+        y_movement += speed;
     }
     else if (g_frame_counter < MAX_FRAME && g_frame_counter > ((MAX_FRAME / 4) * 3))
     {
-        x_movement -= delta_time * MOVEMENT_SPEED;
-        y_movement -= delta_time * MOVEMENT_SPEED;
+        x_movement -= speed;
+        y_movement -= speed;
     }
     object_model_matrix = glm::translate(object_model_matrix, glm::vec3(x_movement, y_movement, 0.0f));
 }
@@ -229,11 +219,20 @@ void move_in_v(glm::mat4& object_model_matrix, float delta_time)
 // simulates a glowing effect
 void pulse(glm::mat4& object_model_matrix, float delta_time)
 {
-    if (g_frame_counter < MAX_FRAME / 2)
+    // broken up into 4 segments to match v movement
+    if (g_frame_counter < (MAX_FRAME / 4))
     {
         growth += GROWTH_FACTOR * delta_time;
     }
-    if (g_frame_counter > MAX_FRAME / 2)
+    else if (g_frame_counter < (MAX_FRAME / 2) && g_frame_counter >(MAX_FRAME / 4))
+    {
+        growth -= GROWTH_FACTOR * delta_time;
+    }
+    else if (g_frame_counter < ((MAX_FRAME / 4) * 3) && g_frame_counter >(MAX_FRAME / 2))
+    {
+        growth += GROWTH_FACTOR * delta_time;
+    }
+    else if (g_frame_counter < MAX_FRAME && g_frame_counter >((MAX_FRAME / 4) * 3))
     {
         growth -= GROWTH_FACTOR * delta_time;
     }
@@ -249,36 +248,39 @@ void update()
     g_frame_counter += delta_time;
     g_previous_ticks = ticks;
 
+    float wing_speed = 32.0f * delta_time;
+
     // translate body and left wing
     move_in_v(g_model_matrix, delta_time);
-    move_in_v(g_model_matrix_leftwing, delta_time);
-    move_in_v(g_model_matrix_leftglow, delta_time);
+    g_model_matrix_leftwing = glm::translate(g_model_matrix, glm::vec3(x_movement , y_movement, 0.0f));
+    g_model_matrix_leftglow = glm::translate(g_model_matrix, glm::vec3(x_movement, y_movement, 0.0f));
     if(g_frame_counter < (MAX_FRAME / 2))
     {
-        left_flap += 20.0f * delta_time;
+        left_flap += wing_speed;
     }
     if (g_frame_counter > (MAX_FRAME / 2))
     {
-        left_flap -= 20.0f * delta_time;
+        left_flap -= wing_speed;
     }
-    g_model_matrix_leftwing = glm::rotate(g_model_matrix_leftwing, glm::radians(left_flap), glm::vec3(0.0f, 0.0f, 1.0f)); // rotate wing
+    pulse(g_model_matrix_leftwing, delta_time);
     pulse(g_model_matrix_leftglow, delta_time);
+    g_model_matrix_leftwing = glm::rotate(g_model_matrix_leftwing, glm::radians(left_flap), glm::vec3(0.0f, 0.0f, 1.0f)); // rotate wing
     g_model_matrix_leftglow = glm::rotate(g_model_matrix_leftglow, glm::radians(left_flap), glm::vec3(0.0f, 0.0f, 1.0f)); 
     // pulse flow and THEN move with wing
 
-    // apply same to right wing
-    move_in_v(g_model_matrix_rightwing, delta_time);
-    move_in_v(g_model_matrix_rightglow, delta_time);
+    g_model_matrix_rightwing = glm::translate(g_model_matrix, glm::vec3(x_movement, y_movement, 0.0f));
+    g_model_matrix_rightglow = glm::translate(g_model_matrix, glm::vec3(x_movement, y_movement, 0.0f));
     if(g_frame_counter < (MAX_FRAME / 2))
     {
-        right_flap -= 20.0f * delta_time;
+        right_flap -= wing_speed;
     }
     if (g_frame_counter > (MAX_FRAME / 2))
     {
-        right_flap += 20.0f * delta_time;
+        right_flap += wing_speed;
     }
-    g_model_matrix_rightwing = glm::rotate(g_model_matrix_rightwing, glm::radians(right_flap), glm::vec3(0.0f, 0.0f, 1.0f));
+    pulse(g_model_matrix_rightwing, delta_time);
     pulse(g_model_matrix_rightglow, delta_time);
+    g_model_matrix_rightwing = glm::rotate(g_model_matrix_rightwing, glm::radians(right_flap), glm::vec3(0.0f, 0.0f, 1.0f));
     g_model_matrix_rightglow = glm::rotate(g_model_matrix_rightglow, glm::radians(right_flap), glm::vec3(0.0f, 0.0f, 1.0f));
 
     if (g_frame_counter >= MAX_FRAME) g_frame_counter = 0;
